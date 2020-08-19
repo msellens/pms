@@ -4,7 +4,8 @@ import json
 import pickle
 
 import numpy as np
-from scipy.misc import imread
+#from scipy.misc import imread
+from imageio import imread
 from scipy import sparse
 from scipy import optimize
 
@@ -17,7 +18,8 @@ import mesh
 
 def getImage(filename):
     """Open image file in greyscale mode (intensity)."""
-    return imread(filename, flatten=True)
+    #return imread(filename, flatten=True)
+    return imread(filename, as_gray=True)
 
 
 def getLightning(filename):
@@ -40,7 +42,7 @@ def photometricStereo(lightning_filename, images_filenames):
 
     I = np.vstack(x.ravel() for x in images)
     output = np.zeros((3, I.shape[1]))
-    N = np.vstack(lightning[x] for x in images_filenames)
+    N = np.vstack(lightpythonning[x] for x in images_filenames)
     N_i = np.linalg.pinv(N)
     rho = np.linalg.norm(N_i.dot( I ), axis=0)
     I = I / rho
@@ -247,6 +249,9 @@ def main():
     mesh.write3dNormals(normals, 'out-3dn.stl')
     surface = mesh.surfaceFromNormals(normals)
     mesh.writeMesh(surface, normals, 'out-mesh.stl')
+    heightMap = mesh.surfaceToHeight(surface)
+    plt.imsave('out-height.png', heightMap)
+    mesh.writeObj(surface, normals, 'out-surface.obj')
 
 
 if __name__ == "__main__":

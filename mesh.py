@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 from scipy import sparse
 from scipy import isnan as scipy_isnan
-
+import numpy.matlib
 
 ASCII_FACET = """facet normal 0 0 0
 outer loop
@@ -180,7 +180,10 @@ def surfaceFromNormals(normals):
         normals[:,:,0].ravel(),
         normals[:,:,1].ravel(),
     )).reshape(-1, 1)
-    m[inner_boundaries] = 0
+    print(inner_boundaries.shape, m.shape)
+    i_b = np.hstack((inner_boundaries, inner_boundaries)).reshape(-1,1)
+    print(i_b.shape, m.shape)
+    m[i_b] = 0
     m = m[valid_idx]
     m = np.vstack((
         m,
@@ -231,7 +234,16 @@ def write3dNormals(normals, filename):
                     writer.add_faces(quad)
         writer.close()
 
-
+def surfaceToHeight(surface):
+    minH = np.amin(surface[:,:,2])
+    maxH = np.amax(surface[:,:,2])
+    scale = maxH - minH
+    height = (surface[:,:,2] - minH) / scale
+    return height
+    
+def writeObj(surface, normals, filename):
+    print('obj here')
+    
 if __name__ == '__main__':
     with open('data.pkl', 'rb') as fhdl:
         normals = pickle.load(fhdl)
